@@ -1,20 +1,24 @@
 {
-  "Author": "Sgtcatt",
-  "Name": "MSQRouletteSkip",
-  "InternalName": "MSQRouletteSkip",
-  "AssemblyVersion": "0.0.0.1",
-  "Description": "A description that shows up in /xlplugins. List any major slash-command(s).",
-  "ApplicableVersion": "any",
-  "Tags": [
-    "sample",
-    "plugin",
-    "goats"
-  ],
-  "DalamudApiLevel": 10,
-  "LoadRequiredState": 0,
-  "LoadSync": false,
-  "CanUnloadAsync": false,
-  "LoadPriority": 0,
-  "Punchline": "A short one-liner that shows up in /xlplugins.",
-  "AcceptsFeedback": true
+    "Author": "Sgtcatt",
+    "Name": "MSQRouletteSkip",
+    "InternalName": "MSQRouletteSkip",
+    "AssemblyVersion": "0.0.0.1",
+    "Description": "Thank you to a08381 for the original cutscene skip plugin https://github.com/a08381/Dalamud.SkipCutscene",
+    "ApplicableVersion": "any",
+    "Tags": [
+        "Skip",
+        "msq",
+        "roulette"
+    ],
+    "DalamudApiLevel": 10,
+    "LoadRequiredState": 0,
+    "LoadSync": false,
+    "CanUnloadAsync": false,
+    "LoadPriority": 0,
+    "Punchline": "Help you skip cutscene from Duty Roulette: Main Scenario.",
+    "AcceptsFeedback": true,
+    "RepoUrl": "https://github.com/MisterCatt/MSQRouletteSkip.git",
+    "DownloadLinkInstall": "https://github.com/MisterCatt/MSQRouletteSkip/raw/master/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/MisterCatt/MSQRouletteSkip/raw/master/latest.zip",
+    "DownloadLinkTesting": "https://github.com/MisterCatt/MSQRouletteSkip/raw/master/latest.zip"
 }
