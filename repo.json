@@ -1,0 +1,20 @@
+{
+  "Author": "Sgtcatt",
+  "Name": "MSQRouletteSkip",
+  "InternalName": "MSQRouletteSkip",
+  "AssemblyVersion": "0.0.0.1",
+  "Description": "A description that shows up in /xlplugins. List any major slash-command(s).",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "sample",
+    "plugin",
+    "goats"
+  ],
+  "DalamudApiLevel": 10,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "Punchline": "A short one-liner that shows up in /xlplugins.",
+  "AcceptsFeedback": true
+}

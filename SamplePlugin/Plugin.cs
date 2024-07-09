@@ -1,73 +1,129 @@
-﻿using Dalamud.Game.Command;
+using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
-using System.IO;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using SamplePlugin.Windows;
+using Dalamud.Game;
+using System.Diagnostics;
+using System;
+using System.Security.Cryptography;
+using Dalamud;
 
-namespace SamplePlugin;
+namespace Sgtcatt.SkipCutscene;
 
-public sealed class Plugin : IDalamudPlugin
+public sealed class SkipCutscene : IDalamudPlugin
 {
-    [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
+    public string Name => "SkipCutscene";
+
+    [PluginService] internal static IDalamudPluginInterface Interface { get; private set; } = null!;
     [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
+    [PluginService] public static IPluginLog PluginLog { get; private set; }
+    [PluginService] public static IChatGui ChatGui { get; private set; }
+    [PluginService] public static ISigScanner SigScanner { get; private set; }
 
-    private const string CommandName = "/pmycommand";
+    private const string CommandName = "/sc";
+
+    private readonly RandomNumberGenerator _csp;
+
+    private readonly decimal _base = uint.MaxValue;
 
     public Configuration Configuration { get; init; }
 
-    public readonly WindowSystem WindowSystem = new("SamplePlugin");
-    private ConfigWindow ConfigWindow { get; init; }
-    private MainWindow MainWindow { get; init; }
+    public readonly WindowSystem WindowSystem = new("Skip-Cutscene");
 
-    public Plugin()
+    public CutsceneAddressResolver Address { get; }
+
+    public void SetEnabled(bool isEnable)
     {
-        Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        if (!Address.Valid) return;
+        if (isEnable)
+        {
+            SafeMemory.Write<short>(Address.Offset1, -28528);
+            SafeMemory.Write<short>(Address.Offset2, -28528);
+        }
+        else
+        {
+            SafeMemory.Write<short>(Address.Offset1, 13173);
+            SafeMemory.Write<short>(Address.Offset2, 6260);
+        }
+    }
 
-        // you might normally want to embed resources and load them from the manifest stream
-        var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
+    public SkipCutscene()
+    {
+        Configuration = Interface.GetPluginConfig() as Configuration ?? new Configuration();
 
-        ConfigWindow = new ConfigWindow(this);
-        MainWindow = new MainWindow(this, goatImagePath);
+        Address = new CutsceneAddressResolver();
 
-        WindowSystem.AddWindow(ConfigWindow);
-        WindowSystem.AddWindow(MainWindow);
+        Address.Setup(SigScanner);
+
+        if (Address.Valid)
+        {
+            PluginLog.Information("Cutscene Offset Found.");
+            if (Configuration.IsEnabled)
+                SetEnabled(true);
+        }
+        else
+        {
+            PluginLog.Error("Cutscene Offset Not Found.");
+            PluginLog.Warning("Plugin Disabling...");
+            Dispose();
+            return;
+        }
+
+        _csp = RandomNumberGenerator.Create();
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "A useful message to display in /xlhelp"
+            HelpMessage = "Roll your sanity check dice."
         });
-
-        PluginInterface.UiBuilder.Draw += DrawUI;
-
-        // This adds a button to the plugin installer entry of this plugin which allows
-        // to toggle the display status of the configuration ui
-        PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUI;
-
-        // Adds another button that is doing the same but for the main ui of the plugin
-        PluginInterface.UiBuilder.OpenMainUi += ToggleMainUI;
     }
 
     public void Dispose()
     {
         WindowSystem.RemoveAllWindows();
 
-        ConfigWindow.Dispose();
-        MainWindow.Dispose();
+        SetEnabled(false);
+        GC.SuppressFinalize(this);
 
         CommandManager.RemoveHandler(CommandName);
     }
 
     private void OnCommand(string command, string args)
     {
-        // in response to the slash command, just toggle the display status of our main ui
-        ToggleMainUI();
+        if (command.ToLower() != "/sc") return;
+        byte[] rndSeries = new byte[4];
+        _csp.GetBytes(rndSeries);
+        int rnd = (int)Math.Abs(BitConverter.ToUInt32(rndSeries, 0) / _base * 50 + 1);
+        ChatGui.Print(Configuration.IsEnabled
+            ? $"sancheck: 1d100={rnd + 50}, Failed"
+            : $"sancheck: 1d100={rnd}, Passed");
+        Configuration.IsEnabled = !Configuration.IsEnabled;
+        SetEnabled(Configuration.IsEnabled);
+        Interface.SavePluginConfig(Configuration);
     }
 
-    private void DrawUI() => WindowSystem.Draw();
+    public class CutsceneAddressResolver : BaseAddressResolver
+    {
 
-    public void ToggleConfigUI() => ConfigWindow.Toggle();
-    public void ToggleMainUI() => MainWindow.Toggle();
+        public bool Valid => Offset1 != IntPtr.Zero && Offset2 != IntPtr.Zero;
+
+        public IntPtr Offset1 { get; private set; }
+        public IntPtr Offset2 { get; private set; }
+
+        protected override void Setup64Bit(ISigScanner sig)
+        {
+            Offset1 = sig.ScanText("75 33 48 8B 0D ?? ?? ?? ?? BA ?? 00 00 00 48 83 C1 10 E8 ?? ?? ?? ?? 83 78");
+            Offset2 = sig.ScanText("74 18 8B D7 48 8D 0D");
+            SkipCutscene.PluginLog.Information(
+                "Offset1: [\"ffxiv_dx11.exe\"+{0}]",
+                (Offset1.ToInt64() - Process.GetCurrentProcess().MainModule!.BaseAddress.ToInt64()).ToString("X")
+                );
+            SkipCutscene.PluginLog.Information(
+                "Offset2: [\"ffxiv_dx11.exe\"+{0}]",
+                (Offset2.ToInt64() - Process.GetCurrentProcess().MainModule!.BaseAddress.ToInt64()).ToString("X")
+                );
+        }
+
+    }
 }
