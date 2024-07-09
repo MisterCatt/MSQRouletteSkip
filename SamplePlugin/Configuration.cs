@@ -10,7 +10,7 @@ public class Configuration : IPluginConfiguration
     public int Version { get; set; } = 0;
 
     [DefaultValue(true)]
-    public bool IsEnabled { get; set; }
+    public bool IsEnabled { get; set; } = true;
 
     // the below exist just to make saving less cumbersome
     public void Save()

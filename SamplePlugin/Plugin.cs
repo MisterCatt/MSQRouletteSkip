@@ -13,14 +13,16 @@ namespace Sgtcatt.SkipCutscene;
 
 public sealed class SkipCutscene : IDalamudPlugin
 {
-    public string Name => "SkipCutscene";
-
+    //Plugin service
     [PluginService] internal static IDalamudPluginInterface Interface { get; private set; } = null!;
     [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] public static IPluginLog PluginLog { get; private set; }
     [PluginService] public static IChatGui ChatGui { get; private set; }
     [PluginService] public static ISigScanner SigScanner { get; private set; }
+
+    //Data
+    public string Name => "SkipCutscene";
 
     private const string CommandName = "/sc";
 
@@ -29,10 +31,14 @@ public sealed class SkipCutscene : IDalamudPlugin
     private readonly decimal _base = uint.MaxValue;
 
     public Configuration Configuration { get; init; }
-
-    public readonly WindowSystem WindowSystem = new("Skip-Cutscene");
-
     public CutsceneAddressResolver Address { get; }
+
+
+    //Windows
+    public readonly WindowSystem WindowSystem = new("Skip-Cutscene");
+    private MainWindow MainWindow { get; init; }
+    
+
 
     public void SetEnabled(bool isEnable)
     {
@@ -73,10 +79,18 @@ public sealed class SkipCutscene : IDalamudPlugin
 
         _csp = RandomNumberGenerator.Create();
 
+        MainWindow = new MainWindow(this, Configuration);
+
+        WindowSystem.AddWindow(MainWindow);
+
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
             HelpMessage = "Roll your sanity check dice."
         });
+
+        Interface.UiBuilder.Draw += DrawUI;
+
+        Interface.UiBuilder.OpenMainUi += ToggleMainUI;
     }
 
     public void Dispose()
@@ -91,16 +105,18 @@ public sealed class SkipCutscene : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
-        if (command.ToLower() != "/sc") return;
-        byte[] rndSeries = new byte[4];
-        _csp.GetBytes(rndSeries);
-        int rnd = (int)Math.Abs(BitConverter.ToUInt32(rndSeries, 0) / _base * 50 + 1);
-        ChatGui.Print(Configuration.IsEnabled
-            ? $"sancheck: 1d100={rnd + 50}, Failed"
-            : $"sancheck: 1d100={rnd}, Passed");
-        Configuration.IsEnabled = !Configuration.IsEnabled;
-        SetEnabled(Configuration.IsEnabled);
-        Interface.SavePluginConfig(Configuration);
+        ToggleMainUI();
+
+        //if (command.ToLower() != "/sc") return;
+        //byte[] rndSeries = new byte[4];
+        //_csp.GetBytes(rndSeries);
+        //int rnd = (int)Math.Abs(BitConverter.ToUInt32(rndSeries, 0) / _base * 50 + 1);
+        //ChatGui.Print(Configuration.IsEnabled
+        //    ? $"sancheck: 1d100={rnd + 50}, Failed"
+        //    : $"sancheck: 1d100={rnd}, Passed");
+        //Configuration.IsEnabled = !Configuration.IsEnabled;
+        //SetEnabled(Configuration.IsEnabled);
+        //Interface.SavePluginConfig(Configuration);
     }
 
     public class CutsceneAddressResolver : BaseAddressResolver
@@ -126,4 +142,8 @@ public sealed class SkipCutscene : IDalamudPlugin
         }
 
     }
+
+    private void DrawUI() => WindowSystem.Draw();
+
+    public void ToggleMainUI() => MainWindow.Toggle();
 }
