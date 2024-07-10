@@ -29,11 +29,11 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.Text($"Toggle skip cutscenes");
         var configValue = Configuration.IsEnabled;
-        if (ImGui.Checkbox("Random Config Bool", ref configValue))
+        if (ImGui.Checkbox("Skip cutscenes: ", ref configValue))
         {
             Configuration.IsEnabled = configValue;
+            plugin.SetEnabled(Configuration.IsEnabled);
             // can save immediately on change, if you don't want to provide a "Save and Close" button
             Configuration.Save();
         }

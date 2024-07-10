@@ -25,6 +25,8 @@ public sealed class SkipCutscene : IDalamudPlugin
     public string Name => "SkipCutscene";
 
     private const string CommandName = "/sc";
+    private const string RollSanityCheckCommand = "/scroll";
+    private const string Secret = "/scsecret";
 
     private readonly RandomNumberGenerator _csp;
 
@@ -105,18 +107,19 @@ public sealed class SkipCutscene : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
-        ToggleMainUI();
+        if (command.ToLower() == "/sc") ToggleMainUI();
 
-        //if (command.ToLower() != "/sc") return;
-        //byte[] rndSeries = new byte[4];
-        //_csp.GetBytes(rndSeries);
-        //int rnd = (int)Math.Abs(BitConverter.ToUInt32(rndSeries, 0) / _base * 50 + 1);
-        //ChatGui.Print(Configuration.IsEnabled
-        //    ? $"sancheck: 1d100={rnd + 50}, Failed"
-        //    : $"sancheck: 1d100={rnd}, Passed");
-        //Configuration.IsEnabled = !Configuration.IsEnabled;
-        //SetEnabled(Configuration.IsEnabled);
-        //Interface.SavePluginConfig(Configuration);
+        if (Secret.ToLower() != "/scsecret")
+            ChatGui.Print("Meta is a dingus");
+
+        if (RollSanityCheckCommand.ToLower() != "/scroll") return;
+
+        byte[] rndSeries = new byte[4];
+        _csp.GetBytes(rndSeries);
+        int rnd = (int)Math.Abs(BitConverter.ToUInt32(rndSeries, 0) / _base * 50 + 1);
+        ChatGui.Print(Configuration.IsEnabled
+            ? $"sancheck: 1d100={rnd + 50}, Failed"
+            : $"sancheck: 1d100={rnd}, Passed");
     }
 
     public class CutsceneAddressResolver : BaseAddressResolver
