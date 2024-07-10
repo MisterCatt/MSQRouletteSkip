@@ -87,7 +87,17 @@ public sealed class SkipCutscene : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
+            HelpMessage = "Open the menu"
+        });
+
+        CommandManager.AddHandler(RollSanityCheckCommand, new CommandInfo(OnCommand)
+        {
             HelpMessage = "Roll your sanity check dice."
+        });
+
+        CommandManager.AddHandler(Secret, new CommandInfo(OnCommand)
+        {
+            HelpMessage = "Secret :)"
         });
 
         Interface.UiBuilder.Draw += DrawUI;
@@ -109,17 +119,20 @@ public sealed class SkipCutscene : IDalamudPlugin
     {
         if (command.ToLower() == "/sc") ToggleMainUI();
 
-        if (Secret.ToLower() != "/scsecret")
+        if (Secret.ToLower() == "/scsecret")
             ChatGui.Print("Meta is a dingus");
 
-        if (RollSanityCheckCommand.ToLower() != "/scroll") return;
+        if (RollSanityCheckCommand.ToLower() == "/scroll")
+        {
+            byte[] rndSeries = new byte[4];
+            _csp.GetBytes(rndSeries);
+            int rnd = (int)Math.Abs(BitConverter.ToUInt32(rndSeries, 0) / _base * 50 + 1);
+            ChatGui.Print(Configuration.IsEnabled
+                ? $"sancheck: 1d100={rnd + 50}, Failed"
+                : $"sancheck: 1d100={rnd}, Passed");
+        }
 
-        byte[] rndSeries = new byte[4];
-        _csp.GetBytes(rndSeries);
-        int rnd = (int)Math.Abs(BitConverter.ToUInt32(rndSeries, 0) / _base * 50 + 1);
-        ChatGui.Print(Configuration.IsEnabled
-            ? $"sancheck: 1d100={rnd + 50}, Failed"
-            : $"sancheck: 1d100={rnd}, Passed");
+        
     }
 
     public class CutsceneAddressResolver : BaseAddressResolver
