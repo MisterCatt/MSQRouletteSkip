@@ -13,12 +13,6 @@ public class MainWindow : Window, IDisposable
     public MainWindow(SkipCutscene plugin, Configuration config)
         : base("Data window##With a hidden ID", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
-        SizeConstraints = new WindowSizeConstraints
-        {
-            MinimumSize = new Vector2(375, 330),
-            MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
-        };
-
         this.plugin = plugin;
         Configuration = config;
     }

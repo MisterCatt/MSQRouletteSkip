@@ -117,12 +117,19 @@ public sealed class SkipCutscene : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
-        if (command.ToLower() == "/sc") ToggleMainUI();
+        if (command.ToLower() == "/sc")
+        {
+            ToggleMainUI();
+            return;
+        }
 
-        if (Secret.ToLower() == "/scsecret")
+        if (command.ToLower() == "/scsecret")
+        {
             ChatGui.Print("Meta is a dingus");
+            return;
+        }
 
-        if (RollSanityCheckCommand.ToLower() == "/scroll")
+        if (command.ToLower() == "/scroll")
         {
             byte[] rndSeries = new byte[4];
             _csp.GetBytes(rndSeries);
@@ -130,6 +137,8 @@ public sealed class SkipCutscene : IDalamudPlugin
             ChatGui.Print(Configuration.IsEnabled
                 ? $"sancheck: 1d100={rnd + 50}, Failed"
                 : $"sancheck: 1d100={rnd}, Passed");
+
+            return;
         }
 
         
