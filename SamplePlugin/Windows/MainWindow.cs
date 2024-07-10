@@ -30,7 +30,7 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         var configValue = Configuration.IsEnabled;
-        if (ImGui.Checkbox("Skip cutscenes: ", ref configValue))
+        if (ImGui.Checkbox(" - Skip cutscenes", ref configValue))
         {
             Configuration.IsEnabled = configValue;
             plugin.SetEnabled(Configuration.IsEnabled);
