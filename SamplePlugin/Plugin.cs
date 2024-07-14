@@ -13,15 +13,17 @@ using Dalamud.Game.Text.SeStringHandling;
 
 namespace Sgtcatt.SkipCutscene;
 
-public sealed class SkipCutscene : IDalamudPlugin, IToastGui
+public sealed class SkipCutscene : IDalamudPlugin
 {
-    //Plugin service
+    //Plugin serviceD
     [PluginService] internal static IDalamudPluginInterface Interface { get; private set; } = null!;
     [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] public static IPluginLog PluginLog { get; private set; }
     [PluginService] public static IChatGui ChatGui { get; private set; }
     [PluginService] public static ISigScanner SigScanner { get; private set; }
+
+    [PluginService] public static IToastGui ToastGui { get; private set; }
 
     //Data
     public string Name => "SkipCutscene";
@@ -40,10 +42,6 @@ public sealed class SkipCutscene : IDalamudPlugin, IToastGui
 
     //Windows
     public readonly WindowSystem WindowSystem = new("Skip-Cutscene");
-
-    public event IToastGui.OnNormalToastDelegate Toast;
-    public event IToastGui.OnQuestToastDelegate QuestToast;
-    public event IToastGui.OnErrorToastDelegate ErrorToast;
 
     private MainWindow MainWindow { get; init; }
     
@@ -127,13 +125,16 @@ public sealed class SkipCutscene : IDalamudPlugin, IToastGui
         if (command.ToLower() == "/sc")
         {
             //ToggleMainUI();
-            ShowNormal("test", null);
+            ToastGui.ShowQuest("test");
             return;
         }
 
         if (command.ToLower() == "/scsecret")
         {
             ChatGui.Print("Meta is a dingus");
+            
+            
+
             return;
         }
 
@@ -179,34 +180,4 @@ public sealed class SkipCutscene : IDalamudPlugin, IToastGui
     private void DrawUI() => WindowSystem.Draw();
 
     public void ToggleMainUI() => MainWindow.Toggle();
-
-    public void ShowNormal(string message, ToastOptions? options = null)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void ShowNormal(SeString message, ToastOptions? options = null)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void ShowQuest(string message, QuestToastOptions? options = null)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void ShowQuest(SeString message, QuestToastOptions? options = null)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void ShowError(string message)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void ShowError(SeString message)
-    {
-        throw new NotImplementedException();
-    }
 }
