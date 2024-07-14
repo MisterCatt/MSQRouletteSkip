@@ -8,10 +8,12 @@ using System.Diagnostics;
 using System;
 using System.Security.Cryptography;
 using Dalamud;
+using Dalamud.Game.Gui.Toast;
+using Dalamud.Game.Text.SeStringHandling;
 
 namespace Sgtcatt.SkipCutscene;
 
-public sealed class SkipCutscene : IDalamudPlugin
+public sealed class SkipCutscene : IDalamudPlugin, IToastGui
 {
     //Plugin service
     [PluginService] internal static IDalamudPluginInterface Interface { get; private set; } = null!;
@@ -38,6 +40,11 @@ public sealed class SkipCutscene : IDalamudPlugin
 
     //Windows
     public readonly WindowSystem WindowSystem = new("Skip-Cutscene");
+
+    public event IToastGui.OnNormalToastDelegate Toast;
+    public event IToastGui.OnQuestToastDelegate QuestToast;
+    public event IToastGui.OnErrorToastDelegate ErrorToast;
+
     private MainWindow MainWindow { get; init; }
     
 
@@ -119,7 +126,8 @@ public sealed class SkipCutscene : IDalamudPlugin
     {
         if (command.ToLower() == "/sc")
         {
-            ToggleMainUI();
+            //ToggleMainUI();
+            ShowNormal("test", null);
             return;
         }
 
@@ -171,4 +179,34 @@ public sealed class SkipCutscene : IDalamudPlugin
     private void DrawUI() => WindowSystem.Draw();
 
     public void ToggleMainUI() => MainWindow.Toggle();
+
+    public void ShowNormal(string message, ToastOptions? options = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ShowNormal(SeString message, ToastOptions? options = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ShowQuest(string message, QuestToastOptions? options = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ShowQuest(SeString message, QuestToastOptions? options = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ShowError(string message)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ShowError(SeString message)
+    {
+        throw new NotImplementedException();
+    }
 }
