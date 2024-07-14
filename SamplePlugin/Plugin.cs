@@ -126,14 +126,22 @@ public sealed class SkipCutscene : IDalamudPlugin
         {
             if (Configuration.IsEnabled)
             {
-                ToastGui.ShowQuest("Plugin is now off. Cutescenes will not be skipped");
+                QuestToastOptions questToastOptions = new QuestToastOptions();
+                questToastOptions.PlaySound = true;
+                questToastOptions.DisplayCheckmark = true;
+
+                ToastGui.ShowQuest("Plugin is now off. Cutescenes will not be skipped", questToastOptions);
                 SetEnabled(false);
                 Configuration.IsEnabled = false;
                 Configuration.Save();
             }
             else
             {
-                ToastGui.ShowQuest("Plugin is now on. Cutescenes will be skipped");
+                QuestToastOptions questToastOptions = new QuestToastOptions();
+                questToastOptions.PlaySound = true;
+                questToastOptions.DisplayCheckmark = false;
+
+                ToastGui.ShowQuest("Plugin is now on. Cutescenes will be skipped", questToastOptions);
                 SetEnabled(true);
                 Configuration.IsEnabled = true;
                 Configuration.Save();
