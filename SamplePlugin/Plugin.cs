@@ -124,8 +124,18 @@ public sealed class SkipCutscene : IDalamudPlugin
     {
         if (command.ToLower() == "/sc")
         {
-            //ToggleMainUI();
-            ToastGui.ShowQuest("test");
+            if (Configuration.IsEnabled)
+            {
+                ToastGui.ShowQuest("Plugin is now off. Cutescenes will not be skipped");
+                SetEnabled(!Configuration.IsEnabled);
+                Configuration.Save();
+            }
+            else
+            {
+                ToastGui.ShowQuest("Plugin is now on. Cutescenes will be skipped");
+                SetEnabled(Configuration.IsEnabled);
+                Configuration.Save();
+            }
             return;
         }
 
